@@ -1,0 +1,76 @@
+COPT = -g -I . -O0 -D__PANDORA__ -DUSE_SA1 `$(SDK_PATH)/$(TARGET_SYS)/usr/bin/sdl-config --cflags`
+#COPT += -ffast-math -fexpensive-optimizations -finline -finline-functions -msoft-float -falign-functions=32 -falign-loops -falign-labels -falign-jumps -fomit-frame-pointer -fprofile-use
+GCC = $(CC)
+GXX = $(CXX)
+#STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/arm-open2x-linux-strip.exe
+ADSASM = $(AS)
+
+#
+# SNES stuff (c-based)
+#
+OBJS = memset.o memcpy.o 2xsaiwin.o apu.o c4.o c4emu.o cheats.o cheats2.o clip.o cpu.o cpuexec.o data.o 
+OBJS += dma.o dsp1.o fxemu.o fxinst.o gfx.o globals.o loadzip.o memmap.o ppu.o sa1.o sa1cpu.o
+OBJS += sdd1.o sdd1emu.o snapshot.o soundux.o spc700.o spc700a.o srtc.o tile.o usbjoy.o cpuops.o os9x_asm_cpu.o
+#
+# and some asm from LJP...
+#
+OBJS += m3d_func.o
+#
+# Dave's minimal SDK
+#
+OBJS += pandora_sdk.o menu.o input.o gp2x_menutile.o gp2x_highlightbar.o \
+	gp2x_menu_header.o unzip.o ioapi.o zip.o
+
+#
+# and the glue code that sticks it all together :)
+#
+OBJS += main.o
+
+LIBS += `$(SDK_PATH)/$(TARGET_SYS)/usr/bin/sdl-config --libs`
+
+# Inopia's menu system, hacked for the GP2X under rlyeh's sdk
+PRELIBS = -L/usr/local/angstrom/arm/arm-angstrom-linux-gnueabi/usr/lib -lpthread -lz $(LIBS) -fprofile-use
+
+all: pocketsnes
+clean: tidy pocketsnes
+
+.c.o:
+	$(GCC) $(COPT) -c $< -o $@
+
+.cpp.o:
+	$(GXX) $(COPT) -c $< -o $@
+
+# make seems to lowercase the extensions, so files with '.S' end up being passed to the compiler as '.s', which means thousands of errors.
+# this is a small workaround. 
+
+spc700a.o: spc700a.s
+	$(GCC) $(COPT) -c $< -o $@
+
+os9x_65c816.o: os9x_65c816.s
+	$(GCC) $(COPT) -c $< -o $@
+
+osnes9xgp_asmfunc.o: osnes9xgp_asmfunc.s
+	$(GCC) $(COPT) -c $< -o $@
+
+m3d_func.o: m3d_func.S
+	$(GCC) $(COPT) -c $< -o $@
+
+spc_decode.o: spc_decode.s
+	$(GCC) $(COPT) -c $< -o $@
+
+memset.o: memset.s
+	$(GCC) $(COPT) -c $< -o $@
+
+memcpy.o: memcpy.s
+	$(GCC) $(COPT) -c $< -o $@
+
+dspMixer.o: dspMixer.s
+	$(GCC) $(COPT) -c $< -o $@
+
+pocketsnesd: $(OBJS)
+	$(GXX) $(OBJS) $(PRELIBS) -o $@ -lstdc++ -lm
+
+pocketsnes: pocketsnesd
+	$(STRIP) pocketsnesd -o pocketsnes
+tidy:
+	rm *.o
