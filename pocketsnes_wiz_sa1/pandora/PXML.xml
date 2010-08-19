@@ -6,7 +6,7 @@
 
     <title lang="en_US">PocketSNES Hack 0.1</title>
  
-    <exec command="./pocketsnes"/>
+    <exec command="./run.sh"/>
  
     <description lang="en_US">PocketSNES Hack 0.1</description>
 

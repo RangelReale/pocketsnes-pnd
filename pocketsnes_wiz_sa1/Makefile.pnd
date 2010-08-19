@@ -1,5 +1,8 @@
-COPT = -g -I . -O0 -D__PANDORA__ -DUSE_SA1 `$(SDK_PATH)/$(TARGET_SYS)/usr/bin/sdl-config --cflags`
-#COPT += -ffast-math -fexpensive-optimizations -finline -finline-functions -msoft-float -falign-functions=32 -falign-loops -falign-labels -falign-jumps -fomit-frame-pointer -fprofile-use
+COPT = -g -I . -O3 -D__PANDORA__ -DUSE_SA1 -I/usr/local/pandora/arm-2009q3/usr/include
+COPT += -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp \
+	-ffast-math -fexpensive-optimizations -finline -finline-functions -msoft-float \
+	-falign-functions=32 -falign-loops -falign-labels -falign-jumps -fomit-frame-pointer
+	#-fprofile-use
 GCC = $(CC)
 GXX = $(CXX)
 #STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/arm-open2x-linux-strip.exe
@@ -26,10 +29,10 @@ OBJS += pandora_sdk.o menu.o input.o gp2x_menutile.o gp2x_highlightbar.o \
 #
 OBJS += main.o
 
-LIBS += `$(SDK_PATH)/$(TARGET_SYS)/usr/bin/sdl-config --libs`
-
 # Inopia's menu system, hacked for the GP2X under rlyeh's sdk
-PRELIBS = -L/usr/local/angstrom/arm/arm-angstrom-linux-gnueabi/usr/lib -lpthread -lz $(LIBS) -fprofile-use
+PRELIBS = -L/usr/local/pandora/arm-2009q3/usr/lib -lpthread -lpthread-stubs -lz $(LIBS)
+
+#-fprofile-use
 
 all: pocketsnes
 clean: tidy pocketsnes
@@ -68,7 +71,7 @@ dspMixer.o: dspMixer.s
 	$(GCC) $(COPT) -c $< -o $@
 
 pocketsnesd: $(OBJS)
-	$(GXX) $(OBJS) $(PRELIBS) -o $@ -lstdc++ -lm
+	$(GXX) $(OBJS) $(PRELIBS) -o $@ 
 
 pocketsnes: pocketsnesd
 	$(STRIP) pocketsnesd -o pocketsnes

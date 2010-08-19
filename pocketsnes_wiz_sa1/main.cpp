@@ -793,11 +793,11 @@ void _splitpath (const char *path, char *drive, char *dir, char *fname,
 {
 	*drive = 0;
 
-	char *slash = strrchr (path, '/');
+	char *slash = (char*)strrchr (path, '/');
 	if (!slash)
-		slash = strrchr (path, '\\');
+		slash = (char*)strrchr (path, '\\');
 
-	char *dot = strrchr (path, '.');
+	char *dot = (char*)strrchr (path, '.');
 
 	if (dot && slash && dot < slash)
 		dot = NULL;
