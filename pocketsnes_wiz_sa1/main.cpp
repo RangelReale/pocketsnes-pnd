@@ -526,6 +526,12 @@ extern "C"
 		if (joy & (1<<INP_BUTTON_SELECT)) val |= SNES_SELECT_MASK;
 		
 		if ((joy & (1<<INP_BUTTON_VOL_UP)) && (joy & (1<<INP_BUTTON_VOL_DOWN)))	enterMenu = 1;
+#ifdef __PANDORA__
+		else if (joy & (1<<INP_BUTTON_MENU))
+		{
+			enterMenu = 1;
+		}
+#endif
 		else if (joy & (1<<INP_BUTTON_VOL_UP)) 
 		{
 			snesMenuOptions.volume+=1;

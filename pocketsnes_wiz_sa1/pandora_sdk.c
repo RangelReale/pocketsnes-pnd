@@ -260,7 +260,10 @@ unsigned int gp_getButton(unsigned char enable_diagnals)
 							case KEY_PAGEDOWN:		ret &= ~(1<<INP_BUTTON_B); break;
 							case KEY_PAGEUP:		ret &= ~(1<<INP_BUTTON_X); break;
 							case KEY_HOME:			ret &= ~(1<<INP_BUTTON_Y); break;
-							
+
+							case KEY_MENU:			ret &= ~(1<<INP_BUTTON_MENU); break;
+							case KEY_SPACE:			ret &= ~(1<<INP_BUTTON_MENU); break;							
+
 							case KEY_1: ret &= ~(1<<INP_BUTTON_VOL_UP); break;
 							case KEY_2: ret &= ~(1<<INP_BUTTON_VOL_DOWN); break;
 							default: break;
@@ -281,12 +284,14 @@ unsigned int gp_getButton(unsigned char enable_diagnals)
 							case KEY_PAGEDOWN:		ret |= 1<<INP_BUTTON_B; break;
 							case KEY_PAGEUP:		ret |= 1<<INP_BUTTON_X; break;
 							case KEY_HOME:			ret |= 1<<INP_BUTTON_Y; break;
+
+							case KEY_MENU:			ret |= 1<<INP_BUTTON_MENU; break;
+							case KEY_SPACE:			ret |= 1<<INP_BUTTON_MENU; break;
 							
 							case KEY_1: ret |= 1<<INP_BUTTON_VOL_UP; break;
 							case KEY_2: ret |= 1<<INP_BUTTON_VOL_DOWN; break;
 							default: break;
 						}
-
 					}
 				}
 			}

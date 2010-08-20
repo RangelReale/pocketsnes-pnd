@@ -24,6 +24,7 @@ extern "C" {
 #define INP_BUTTON_VOL_UP			(23)
 #define INP_BUTTON_VOL_DOWN			(22)
 #define INP_BUTTON_STICK_PUSH		(27)
+#define INP_BUTTON_MENU				(28)
 
 void gp_drawString (int x,int y,int len,char *buffer,unsigned short color,void *framebuffer);
 void gp_clearFramebuffer16(unsigned short *framebuffer, unsigned short pal);

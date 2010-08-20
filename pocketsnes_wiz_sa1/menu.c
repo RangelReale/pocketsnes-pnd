@@ -523,6 +523,7 @@ void PrintTile(int flip)
 	if (tileCounter > 5)
 	{
 		tileCounter=0;
+
 		menutileXscroll++;
 		if(menutileXscroll>=MENU_TILE_WIDTH) menutileXscroll=0;
 	  
@@ -1388,7 +1389,7 @@ void SNESOptionsUpdateText(int menu_index)
 			else
 				sprintf(menutext[SNES_MENU_SOUND_RATE],"Sound Rate: %d mono",(unsigned int)soundRates[snesMenuOptions.soundRate]);
 			break;
-#if defined(__GP2X__) || defined(__WIZ__)	 || defined(__PANDORA__)
+#if defined(__GP2X__) || defined(__WIZ__)
 		case SNES_MENU_CPUSPEED:
 			sprintf(menutext[SNES_MENU_CPUSPEED],"Cpu Speed: %d",(unsigned int)cpuSpeedLookup[snesMenuOptions.cpuSpeed]);
 			break;
@@ -1782,9 +1783,13 @@ void SNESOptionsUpdateText_All()
 	SNESOptionsUpdateText(SNES_MENU_SET_ROMDIR);
 	SNESOptionsUpdateText(SNES_MENU_CLEAR_ROMDIR);
 	SNESOptionsUpdateText(SNES_MENU_RETURN);
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__PANDORA__)
+#if defined(__GP2X__) || defined(__WIZ__)
 	SNESOptionsUpdateText(SNES_MENU_RENDER_MODE);
 	SNESOptionsUpdateText(SNES_MENU_CPUSPEED);
+	SNESOptionsUpdateText(SNES_MENU_ACTION_BUTTONS);
+#endif
+#if defined(__PANDORA__)
+	SNESOptionsUpdateText(SNES_MENU_RENDER_MODE);
 	SNESOptionsUpdateText(SNES_MENU_ACTION_BUTTONS);
 #endif
 #if defined(__GP2X__)
@@ -1885,7 +1890,7 @@ int SNESOptionsMenu(void)
 					}
 					SNESOptionsUpdateText(SNES_MENU_SOUND_VOL);
 					break;
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__PANDORA__)
+#if defined(__GP2X__) || defined(__WIZ__)
 				case SNES_MENU_CPUSPEED:
 					if (Inp.held[INP_BUTTON_RIGHT]==1||Inp.repeat[INP_BUTTON_RIGHT])
 					{

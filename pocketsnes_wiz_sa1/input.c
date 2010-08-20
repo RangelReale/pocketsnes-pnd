@@ -139,6 +139,9 @@ int InputUpdate(int EnableDiagnals)
 			(1<<INP_BUTTON_B)|
 			(1<<INP_BUTTON_X)|
 			(1<<INP_BUTTON_Y)|
+#ifdef __PANDORA__
+			(1<<INP_BUTTON_MENU)|
+#endif
 			(1<<INP_BUTTON_VOL_UP)|
 			(1<<INP_BUTTON_VOL_DOWN);
 #endif
@@ -173,7 +176,11 @@ int InputUpdate(int EnableDiagnals)
 		if (held>=0x20)
 		{
 			repeatCounter++;
+#ifdef __PANDORA__
+			if(repeatCounter>5)
+#else
 			if(repeatCounter>15)
+#endif
 			{
 				rep=1;
 				repeatCounter=0;
