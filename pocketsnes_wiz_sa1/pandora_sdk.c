@@ -456,6 +456,7 @@ void *gp2x_sound_play(void)
 			write(snd_dev, (void *)pOutput[CurrentSoundBank], gp2x_sound_buffer[1]);
 			//ioctl(snd_dev, SOUND_PCM_SYNC, 0); 
 			ts.tv_sec=0, ts.tv_nsec=(gp2x_sound_buffer[3]<<16)|gp2x_sound_buffer[2];
+			ts.tv_nsec-=800000; // pandora hack fix
 			nanosleep(&ts, NULL);
 		}
 		else
@@ -504,7 +505,10 @@ int gp_initSound(int rate, int bits, int stereo, int Hz, int frag)
 	int result;
 	char text[256];
 	
+	printf("Init sound: %d %d %d %d %x\n",rate, bits, stereo, Hz, frag);
+
 	//int frag=0x00020010;   // double buffer - frag size = 1<<0xf = 32768
+	//frag=0x00020010;
 
 	//8 = 256				= 2 fps loss			= good sound
 	//9 = 512				= 1 fps loss			= good sound

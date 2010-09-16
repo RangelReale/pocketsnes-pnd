@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PXML xmlns="http://openpandora.org/namespaces/PXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PXML_schema.xsd">
-  <application id="pocketsnes-6.5.0" appdata="pocketsnes_hack">
+  <application id="pocketsnes-6.5.0.1" appdata="pocketsnes">
     <title lang="en_US">PocketSNES</title>
     <description lang="en_US">Nintendo Super NES emulator</description>
  
@@ -8,7 +8,7 @@
 
     <author name="Rangel Reale" website="http://www.rangelreale.com" email="rangelspam@gmail.com"/>
  
-    <version major="6" minor="5" release="0" build="0"/>
+    <version major="6" minor="5" release="0" build="1"/>
     <osversion major="1" minor="0" release="0" build="0"/>
 
     <icon src="snes.png"/>
