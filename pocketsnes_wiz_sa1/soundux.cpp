@@ -88,7 +88,6 @@ if ((v) > 127) \
 #include "cpuexec.h"
 #include "asmmemfuncs.h"
 
-
 static int wave[SOUND_BUFFER_SIZE];
 
 //extern int Echo [24000];
@@ -100,6 +99,10 @@ extern unsigned long Z;
 
 extern long FilterValues[4][2];
 //extern int NoiseFreq [32];
+
+#define FIXED_POINT 0x10000UL
+#define FIXED_POINT_REMAINDER 0xffffUL
+#define FIXED_POINT_SHIFT 16
 
 #define VOL_DIV8  0x8000
 #define VOL_DIV16 0x0080
@@ -871,6 +874,8 @@ void S9xMixSamples (signed short *buffer, int sample_count)
 
 void S9xMixSamplesO (signed short *buffer, int sample_count, int sample_offset)
 {
+	//printf("MIX SAMPLES: %d %d\n", sample_count, sample_offset);
+
 	// 16-bit sound only
 	int J;
 
@@ -1124,6 +1129,10 @@ void S9xResetSound (bool8 full)
     SoundData.master_volume_left = 127;
     SoundData.master_volume_right = 127;
     SoundData.master_volume [0] = SoundData.master_volume [1] = 127;
+    if (so.playback_rate)
+		so.err_rate = (uint32) (FIXED_POINT * SNES_SCANLINE_TIME / (1.0 / so.playback_rate));
+    else
+		so.err_rate = 0;
     SoundData.no_filter = TRUE;
 }
 
@@ -1139,6 +1148,7 @@ extern unsigned long DecreaseRateExp [32];
 void S9xSetPlaybackRate (uint32 playback_rate)
 {
     so.playback_rate = playback_rate;
+    so.err_rate = (uint32) (SNES_SCANLINE_TIME * FIXED_POINT / (1.0 / (double) so.playback_rate));
 
 	if(playback_rate) {
 		// notaz: calclulate a value (let's call it freqbase) to simplify channel freq calculations later.
@@ -1188,7 +1198,7 @@ bool8 S9xInitSound (void)
 {
     so.playback_rate = 0;
     so.stereo = 0;
-    so.buffer_size = 256;
+    so.buffer_size = 1024;
 
     S9xResetSound (TRUE);
     S9xSetSoundMute (TRUE);

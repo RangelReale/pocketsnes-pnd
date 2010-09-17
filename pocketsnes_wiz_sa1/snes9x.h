@@ -127,7 +127,7 @@
 // 1 / PPU clock * 342 -> 64.281us
 // 64.281us / (1 / 3.546895MHz) -> 228 cycles per scanline.
 
-//#define SNES_SCANLINE_TIME (63.695e-6)
+#define SNES_SCANLINE_TIME (63.695e-6)
 //#define SNES_CLOCK_SPEED (3579545)
 
 //#define SNES_CLOCK_LEN (1.0 / SNES_CLOCK_SPEED)

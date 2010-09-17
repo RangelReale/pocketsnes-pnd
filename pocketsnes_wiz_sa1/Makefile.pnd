@@ -1,9 +1,11 @@
-COPT = -g -I . -O3 -D__PANDORA__ -DUSE_SA1 -I/usr/local/pandora/arm-2009q3/usr/include
+#COPT = -g -I . -O3 -D__PANDORA__ -DUSE_SA1 -I/usr/local/pandora/arm-2009q3/usr/include
+COPT = -g -I . -O0 -D__PANDORA__ -DUSE_SA1 -I/usr/local/pandora/arm-2009q3/usr/include
 COPT += -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp \
 	-ffast-math -fexpensive-optimizations -finline -finline-functions -msoft-float \
 	-falign-functions=32 -falign-loops -falign-labels -falign-jumps -fomit-frame-pointer \
 	-funroll-loops
 	#-fprofile-use
+
 GCC = $(CC)
 GXX = $(CXX)
 #STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/arm-open2x-linux-strip.exe

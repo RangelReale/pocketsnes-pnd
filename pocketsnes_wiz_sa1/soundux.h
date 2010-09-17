@@ -197,9 +197,6 @@ extern unsigned long KeyOffERate[10];
 
 
 //#define FIXED_POINT 0x10000UL
-#define FIXED_POINT 0x10000UL
-#define FIXED_POINT_REMAINDER 0xffffUL
-#define FIXED_POINT_SHIFT 16
 
 #define CLIP8(v) \
 if ((v) < -128) \

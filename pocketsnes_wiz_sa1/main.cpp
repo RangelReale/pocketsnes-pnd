@@ -44,6 +44,10 @@ unsigned short *pOutputScreeen;
 #include "snapshot.h"
 
 
+#define FIXED_POINT 0x10000
+#define FIXED_POINT_SHIFT 16
+#define FIXED_POINT_REMAINDER 0xffff
+
 #define EMUVERSION "SquidgeSNES V0.37 01-Jun-06"
 
 //---------------------------------------------------------------------------
@@ -1705,6 +1709,8 @@ void S9xGenerateSound (signed short *Buf, int sample_count_unused)
     block_signal = TRUE;
 
     so.err_counter += so.err_rate;
+	//printf("ERR CNT: %d\n", so.err_counter);
+	//printf("ERR FP: %d\n", FIXED_POINT);
     if (so.err_counter >= FIXED_POINT)
     {
         int sample_count = so.err_counter >> FIXED_POINT_SHIFT;
@@ -1758,10 +1764,10 @@ void S9xGenerateSound (signed short *Buf, int sample_count_unused)
     else
 */
 #endif    
-    if (pending_signal)
-    {
+    //if (pending_signal)
+    //{
 	S9xProcessSound (Buf, sample_count_unused);
 	pending_signal = FALSE;
-    }
+    //}
 }
 
