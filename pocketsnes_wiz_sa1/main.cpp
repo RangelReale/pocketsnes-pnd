@@ -91,6 +91,11 @@ void *currentFrameBuffer;
 int16 oldHeight = 0;
 bool8  ROMAPUEnabled = 0;
 	
+static volatile bool8 block_signal = FALSE;
+static volatile bool8 block_generate_sound = FALSE;
+static volatile bool8 pending_signal = FALSE;
+
+
 static int S9xCompareSDD1IndexEntries (const void *p1, const void *p2)
 {
     return (*(uint32 *) p1 - *(uint32 *) p2);
@@ -99,11 +104,13 @@ static int S9xCompareSDD1IndexEntries (const void *p1, const void *p2)
 void S9xExit ()
 {
 }
+/*
 void S9xGenerateSound (void)
    {
       S9xMessage (0,0,"generate sound");
 	   return;
    }
+*/
    
 extern "C"
 {
@@ -1454,7 +1461,8 @@ int main(int argc, char *argv[])
 								}
 							}
 							S9xMainLoop (); 
-							S9xMixSamples((short*)soundbuffer, samplecount);
+							//S9xMixSamples((short*)soundbuffer, samplecount);
+							S9xGenerateSound((short*)soundbuffer, samplecount);
 						}
 						if (done==aim) break; // Up to date now
 					}
@@ -1557,3 +1565,203 @@ int main(int argc, char *argv[])
 	gp_Reset();
 	return 0;
 }
+
+void *S9xProcessSound (signed short *Buf, int sample_count_unused)
+{
+/*    audio_buf_info info;
+
+    if (!Settings.ThreadSound &&
+	(ioctl (so.sound_fd, SNDCTL_DSP_GETOSPACE, &info) == -1 ||
+	 info.bytes < so.buffer_size))
+    {
+	return (NULL);
+    }
+*/
+#ifdef USE_THREADS
+/*    
+    do
+    {
+*/
+#endif
+
+    int sample_count = so.buffer_size;
+    int byte_offset;
+
+//    if (so.sixteen_bit)
+	sample_count >>= 1;
+ 
+#ifdef USE_THREADS
+//    if (Settings.ThreadSound)
+/*	pthread_mutex_lock (&mutex);*/
+//    else
+#endif
+//    if (block_signal)
+//    {
+//	pending_signal = TRUE;
+//	return (NULL);
+//    }
+
+    block_generate_sound = TRUE;
+
+    if (so.samples_mixed_so_far < sample_count)
+    {
+//	byte_offset = so.play_position + 
+//		      (so.sixteen_bit ? (so.samples_mixed_so_far << 1)
+//				      : so.samples_mixed_so_far);
+	byte_offset = so.play_position + (so.samples_mixed_so_far << 1);
+
+//printf ("%d:", sample_count - so.samples_mixed_so_far); fflush (stdout);
+/*
+	if (Settings.SoundSync == 2)
+	{
+	    memset (Buf + (byte_offset & SOUND_BUFFER_SIZE_MASK), 0,
+		    sample_count - so.samples_mixed_so_far);
+	}
+	else
+*/
+	    S9xMixSamplesO (Buf, sample_count - so.samples_mixed_so_far,
+			    byte_offset & SOUND_BUFFER_SIZE_MASK);
+	so.samples_mixed_so_far = 0;
+    }
+    else
+	so.samples_mixed_so_far -= sample_count;
+    
+//    if (!so.mute_sound)
+    {
+	int I;
+	int J = so.buffer_size;
+
+	byte_offset = so.play_position;
+	so.play_position = (so.play_position + so.buffer_size) & SOUND_BUFFER_SIZE_MASK;
+
+#ifdef USE_THREADS
+//	if (Settings.ThreadSound)
+	    /*pthread_mutex_unlock (&mutex);*/
+#endif
+/*
+	block_generate_sound = FALSE;
+	do
+	{
+	    if (byte_offset + J > SOUND_BUFFER_SIZE)
+	    {
+		I = write (so.sound_fd, (char *) Buf + byte_offset,
+			   SOUND_BUFFER_SIZE - byte_offset);
+		if (I > 0)
+		{
+		    J -= I;
+		    byte_offset = (byte_offset + I) & SOUND_BUFFER_SIZE_MASK;
+		}
+	    }
+	    else
+	    {
+		I = write (so.sound_fd, (char *) Buf + byte_offset, J);
+		if (I > 0)
+		{
+		    J -= I;
+		    byte_offset = (byte_offset + I) & SOUND_BUFFER_SIZE_MASK;
+		}
+	    }
+	} while ((I < 0 && errno == EINTR) || J > 0);
+*/
+    }
+
+#ifdef USE_THREADS
+//    } while (Settings.ThreadSound);
+    /*} while (1);*/
+#endif
+
+    return (NULL);
+}
+
+void S9xGenerateSound (signed short *Buf, int sample_count_unused)
+{
+    int bytes_so_far = (so.samples_mixed_so_far << 1);
+//    int bytes_so_far = so.sixteen_bit ? (so.samples_mixed_so_far << 1) :
+//				        so.samples_mixed_so_far;
+#ifndef _ZAURUS
+/*
+    if (Settings.SoundSync == 2)
+    {
+	// Assumes sound is signal driven
+	while (so.samples_mixed_so_far >= so.buffer_size && !so.mute_sound)
+	    pause ();
+    }
+    else
+*/
+#endif
+    if (bytes_so_far >= so.buffer_size)
+	return;
+
+#ifdef USE_THREADS
+/*
+    if (Settings.ThreadSound)
+    {
+	if (block_generate_sound || pthread_mutex_trylock (&mutex))
+	    return;
+    }
+*/
+#endif
+
+    block_signal = TRUE;
+
+    so.err_counter += so.err_rate;
+    if (so.err_counter >= FIXED_POINT)
+    {
+        int sample_count = so.err_counter >> FIXED_POINT_SHIFT;
+	int byte_offset;
+	int byte_count;
+
+        so.err_counter &= FIXED_POINT_REMAINDER;
+	if (so.stereo)
+	    sample_count <<= 1;
+	byte_offset = bytes_so_far + so.play_position;
+	    
+	do
+	{
+	    int sc = sample_count;
+	    byte_count = sample_count;
+//	    if (so.sixteen_bit)
+		byte_count <<= 1;
+	    
+	    if ((byte_offset & SOUND_BUFFER_SIZE_MASK) + byte_count > SOUND_BUFFER_SIZE)
+	    {
+		sc = SOUND_BUFFER_SIZE - (byte_offset & SOUND_BUFFER_SIZE_MASK);
+		byte_count = sc;
+//		if (so.sixteen_bit)
+		    sc >>= 1;
+	    }
+	    if (bytes_so_far + byte_count > so.buffer_size)
+	    {
+		byte_count = so.buffer_size - bytes_so_far;
+		if (byte_count == 0)
+		    break;
+		sc = byte_count;
+//		if (so.sixteen_bit)
+		    sc >>= 1;
+	    }
+	    S9xMixSamplesO (Buf, sc,
+			    byte_offset & SOUND_BUFFER_SIZE_MASK);
+	    so.samples_mixed_so_far += sc;
+	    sample_count -= sc;
+	    bytes_so_far = (so.samples_mixed_so_far << 1);
+//	    bytes_so_far = so.sixteen_bit ? (so.samples_mixed_so_far << 1) :
+//	 	           so.samples_mixed_so_far;
+	    byte_offset += byte_count;
+	} while (sample_count > 0);
+    }
+    block_signal = FALSE;
+
+#ifdef USE_THREADS
+/*
+    if (Settings.ThreadSound)
+	pthread_mutex_unlock (&mutex);
+    else
+*/
+#endif    
+    if (pending_signal)
+    {
+	S9xProcessSound (Buf, sample_count_unused);
+	pending_signal = FALSE;
+    }
+}
+

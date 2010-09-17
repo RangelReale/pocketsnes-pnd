@@ -101,10 +101,6 @@ extern unsigned long Z;
 extern long FilterValues[4][2];
 //extern int NoiseFreq [32];
 
-//#define FIXED_POINT 0x10000UL
-#define FIXED_POINT_REMAINDER 0xffffUL
-#define FIXED_POINT_SHIFT 16
-
 #define VOL_DIV8  0x8000
 #define VOL_DIV16 0x0080
 #define ENVX_SHIFT 24
@@ -937,6 +933,7 @@ void S9xMixSamplesO (signed short *buffer, int sample_count, int sample_offset)
 					register int E = Echo [SoundData.echo_ptr];
 
 					Loop [(Z - 0) & 15] = E;
+
 					E =  E                    * FilterTaps [0];
 					E += Loop [(Z -  2) & 15] * FilterTaps [1];
 					E += Loop [(Z -  4) & 15] * FilterTaps [2];
@@ -1100,6 +1097,9 @@ void S9xResetSound (bool8 full)
     FilterTaps [7] = 0;
     so.mute_sound = TRUE;
     so.noise_gen = 1;
+    so.samples_mixed_so_far = 0;
+    so.play_position = 0;
+    so.err_counter = 0;
 
     if (full)
     {
@@ -1188,10 +1188,12 @@ bool8 S9xInitSound (void)
 {
     so.playback_rate = 0;
     so.stereo = 0;
+    so.buffer_size = 256;
 
     S9xResetSound (TRUE);
     S9xSetSoundMute (TRUE);
 
     return (1);
 }
+
 

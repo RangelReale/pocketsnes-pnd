@@ -134,7 +134,7 @@ typedef short			int16_32;
 #undef  FAST_LSB_WORD_ACCESS
 //#define ASM_SPC700
 
-EXTERN_C void S9xGenerateSound ();
+EXTERN_C void S9xGenerateSound (signed short *Buf, int sample_count_unused);
 
 //Additional Items for _SNESPPC port
 void _makepath (char *path, const char *drive, const char *dir,
@@ -234,7 +234,7 @@ typedef short			int16_32;
 //#define ASM_SPC700
 #define SUPER_FX
 
-EXTERN_C void S9xGenerateSound ();
+EXTERN_C void S9xGenerateSound (signed short *Buf, int sample_count_unused);
 
 //Additional Items for _SNESPPC port
 void _makepath (char *path, const char *drive, const char *dir,

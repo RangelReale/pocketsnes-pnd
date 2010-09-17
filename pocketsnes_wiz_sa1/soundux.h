@@ -1,4 +1,4 @@
-/*
+/*******************************************************************************
  * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
  *
  * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
@@ -59,8 +59,9 @@ enum { MODE_NONE = SOUND_SILENT, MODE_ADSR, MODE_RELEASE = SOUND_RELEASE,
 #define SOUND_DECODE_LENGTH 16
 
 #define NUM_CHANNELS    8
-#define SOUND_BUFFER_SIZE (2*44100/50)
+#define SOUND_BUFFER_SIZE (1024 * 16)
 #define MAX_BUFFER_SIZE SOUND_BUFFER_SIZE
+#define SOUND_BUFFER_SIZE_MASK (SOUND_BUFFER_SIZE - 1)
 
 #define SOUND_BUFS      4
 
@@ -71,6 +72,12 @@ typedef struct {
     uint8 sound_switch;
     int noise_gen;
 	uint32 freqbase; // notaz
+    // hitnrun
+    int buffer_size;
+    int32  samples_mixed_so_far;
+    int32  play_position;
+    uint32 err_counter;
+    uint32 err_rate;
 } SoundStatus;
 
 EXTERN_C SoundStatus so;
@@ -189,7 +196,11 @@ extern unsigned long DecreaseERateExp[32][10];
 extern unsigned long KeyOffERate[10];
 
 
+//#define FIXED_POINT 0x10000UL
 #define FIXED_POINT 0x10000UL
+#define FIXED_POINT_REMAINDER 0xffffUL
+#define FIXED_POINT_SHIFT 16
+
 #define CLIP8(v) \
 if ((v) < -128) \
     (v) = -128; \

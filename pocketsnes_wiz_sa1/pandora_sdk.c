@@ -464,6 +464,7 @@ void *gp2x_sound_play(void)
 			write(snd_dev, (void *)&gp2x_sound_buffer[4], gp2x_sound_buffer[1]);
 			//ioctl(snd_dev, SOUND_PCM_SYNC, 0); 
 			ts.tv_sec=0, ts.tv_nsec=(gp2x_sound_buffer[3]<<16)|gp2x_sound_buffer[2];
+			ts.tv_nsec-=800000; // pandora hack fix
 			nanosleep(&ts, NULL);
 		}
 	}
@@ -529,7 +530,8 @@ int gp_initSound(int rate, int bits, int stereo, int Hz, int frag)
 		ioctl(snd_dev, SNDCTL_DSP_SETFRAGMENT, &frag);
 		CurrentFrag=frag; // save frag config
 	}
-	result=ioctl(snd_dev, SNDCTL_DSP_SPEED,  &rate);
+
+	result=ioctl(snd_dev, SNDCTL_DSP_SPEED,  &rate);
 	if(result==-1)
 	{
 		debug("Error setting DSP Speed",1);
@@ -552,6 +554,7 @@ int gp_initSound(int rate, int bits, int stereo, int Hz, int frag)
 	//printf("Disable Blocking: %x\r\n",ioctl(wiz_dev[3], 0x5421, &nonblocking));
 	
 	gp2x_sound_buffer[1]=(gp2x_sound_buffer[0]=(rate/Hz)) << (stereo + (bits==16));
+	//gp2x_sound_buffer[1]=gp2x_sound_buffer[1] / 2;
 	gp2x_sound_buffer[2]=(1000000000/Hz)&0xFFFF;
 	gp2x_sound_buffer[3]=(1000000000/Hz)>>16;
  
@@ -564,7 +567,13 @@ int gp_initSound(int rate, int bits, int stereo, int Hz, int frag)
 	pOutput[5] = (short*)bufferStart+(5*gp2x_sound_buffer[1]);
 	pOutput[6] = (short*)bufferStart+(6*gp2x_sound_buffer[1]);
 	pOutput[7] = (short*)bufferStart+(7*gp2x_sound_buffer[1]);
-	
+
+	printf("gp2x_sound_buffer: %d\n", sizeof(gp2x_sound_buffer));
+	printf("gp2x_sound_buffer[0]: %d\n", gp2x_sound_buffer[0]);
+	printf("gp2x_sound_buffer[1]: %d\n", gp2x_sound_buffer[1]);
+	printf("gp2x_sound_buffer[2]: %d\n", gp2x_sound_buffer[2]);
+	printf("gp2x_sound_buffer[3]: %d\n", gp2x_sound_buffer[3]);
+
 	if(!gp2x_sound_thread) 
 	{ 
 		pthread_create( &gp2x_sound_thread, NULL, &gp2x_sound_play, NULL);
